@@ -1,4 +1,6 @@
 import requests
+from sqlalchemy import create_engine, inspect
+import urllib
 
 
 ######################################### CREATING FUNCTION: GET_GEOLOCATION #########################################
@@ -78,3 +80,38 @@ def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key
         return {'ERROR! THE RESQUEST PRODUCED NO RESULTS.'}
 
     return {"travel_distance_km":travel_distance_km, "duration_hours":duration_hours}
+
+
+############################################ CREATING FUNCTION: db_connect ###########################################
+######################################################################################################################
+
+def db_connect(server, database, username, password):
+
+    # read credentials
+    driver = '{ODBC Driver 17 for SQL Server}'
+    conn_mode = 'Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30'
+
+    # create connection object
+    conn_obj = r'Driver={driver};Server=tcp:{server},1433;Database={database};Uid={username};Pwd={password};{conn_mode}'
+
+    # create connection string
+    conn_str = conn_obj.format(driver=driver, server=server, database=database, username=username, password=password, conn_mode=conn_mode)
+
+    # parse using urllib
+    conn_url = 'mssql+pyodbc:///?odbc_connect={url}'.format(url=urllib.parse.quote_plus(conn_str))
+
+    # create engine
+    engine_azure = create_engine(conn_url,echo=False)
+
+    return engine_azure
+
+########################################## CREATING FUNCTION: query_database #########################################
+######################################################################################################################
+
+def query_database(server, database, username, password, query):
+
+    # Start a connection using your dredentials
+    database = db_connect(server, database, username, password)
+
+    ## Querying information
+    return {list(database.execute(query))}
