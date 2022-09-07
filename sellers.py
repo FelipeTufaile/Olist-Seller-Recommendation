@@ -11,7 +11,7 @@ def get_geolocation(query, api_key):
 
     # building url
     parameters = "input={query}&inputtype=textquery&fields=formatted_address%2Cgeometry&key={api_key}"
-    url = base_url + parameters.format(query=query, api_key=api_key)
+    url = base_url + parameters.format(query=str(query), api_key=str(api_key))
 
     # define paylodas and headers as empty
     payload={}
@@ -39,4 +39,4 @@ def get_geolocation(query, api_key):
     except:
         return (None, None, None)
   
-    return (address, latitude, longitude)
+    return {'location_address':address, 'location_latitude':latitude, 'location_latitude':longitude}

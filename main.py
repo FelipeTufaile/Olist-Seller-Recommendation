@@ -1,6 +1,5 @@
 from flask import Flask
 from flask import request
-from datetime import datetime
 import sellers
 
 app = Flask(__name__)
