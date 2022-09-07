@@ -115,3 +115,5 @@ def query_database(server, database, username, password, query):
 
     ## Querying information
     return {list(database.execute(query))}
+
+######################################################################################################################
