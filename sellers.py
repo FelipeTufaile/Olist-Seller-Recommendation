@@ -117,6 +117,6 @@ def get_customer_profile(server, database, username, password, customer_id):
     query = "SELECT * FROM dbo.tb_customers_profile WHERE customer_unique_id = '{customer_id}'".format(customer_id=customer_id)
 
     ## Querying information
-    return {list(database.execute(query))}
+    return {'data':list(database.execute(query))}
 
 ######################################################################################################################
