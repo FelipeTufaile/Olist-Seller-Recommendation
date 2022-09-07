@@ -48,7 +48,7 @@ def get_geolocation(query, api_key):
 ## Creating function calculate seller customer distance
 def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key):
 
-    return {'orgn_lat':orgn_lat, 'orgn_lng':orgn_lng}
+    #return {'orgn_lat':orgn_lat, 'orgn_lng':orgn_lng}
   
     # building url
     base_url = "https://maps.googleapis.com/maps/api/distancematrix/json?"
