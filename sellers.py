@@ -108,10 +108,13 @@ def db_connect(server, database, username, password):
 ########################################## CREATING FUNCTION: query_database #########################################
 ######################################################################################################################
 
-def query_database(server, database, username, password, query):
+def get_customer_profile(server, database, username, password, customer_id):
 
     # Start a connection using your dredentials
     database = db_connect(server, database, username, password)
+
+    # Building query
+    query = "SELECT * FROM dbo.tb_customers_profile WHERE customer_unique_id = '{customer_id}'".format(customer_id=customer_id)
 
     ## Querying information
     return {list(database.execute(query))}
