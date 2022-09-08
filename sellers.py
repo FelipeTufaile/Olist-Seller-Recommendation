@@ -88,7 +88,7 @@ def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key
 def db_connect(server, database, username, password):
 
     # read credentials
-    driver = '{ODBC Driver 17 for SQL Server}'
+    driver = '{ODBC Driver 18 for SQL Server}'
     conn_mode = 'Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30'
 
     # create connection object
