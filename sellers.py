@@ -1,5 +1,5 @@
 import requests
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import create_engine
 import urllib
 
 
@@ -116,7 +116,13 @@ def get_customer_profile(server, database, username, password, customer_id):
     # Building query
     query = "SELECT * FROM dbo.tb_customers_profile WHERE customer_unique_id = '{customer_id}'".format(customer_id=customer_id)
 
+    # Get columns
+    columns = database.execute(query).keys()
+
+    # Get data
+    result = database.execute(query)
+
     ## Querying information
-    return {'data':list(database.execute(query))}
+    return {'data':[dict(zip(columns, row)) for row in result]}
 
 ######################################################################################################################
