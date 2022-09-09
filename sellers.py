@@ -1,6 +1,8 @@
 import requests
 from sqlalchemy import create_engine
 import urllib
+import pandas as pd
+import numpy as np
 
 
 ######################################### CREATING FUNCTION: GET_GEOLOCATION #########################################
@@ -88,7 +90,7 @@ def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key
 def db_connect(server, database, username, password):
 
     # read credentials
-    driver = '{ODBC Driver 18 for SQL Server}'
+    driver = '{ODBC Driver 17 for SQL Server}'
     conn_mode = 'Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30'
 
     # create connection object
@@ -126,3 +128,63 @@ def get_customer_profile(server, database, username, password, customer_id):
     return {'data':[dict(zip(columns, row)) for row in result]}
 
 ######################################################################################################################
+
+
+# Creating function to create customer profile
+def select_customer_profile(server, database, username, password, customer_id, api_key, cep=''):
+
+  # Start a connection using your dredentials
+    database = db_connect(server, database, username, password)
+
+    # Building query
+    query = "SELECT * FROM dbo.tb_customers_profile WHERE customer_unique_id = '{customer_id}'".format(customer_id=customer_id)
+
+    # Get columns
+    columns = database.execute(query).keys()
+
+    # Get data
+    data = database.execute(query)
+
+    # Convert response to pandas table
+    tb_customer_profile = pd.DataFrame(data, columns=columns)
+
+    ## Creating customer array
+    if(tb_customer_profile.shape[0] == 0):
+    
+        # Removing spare columns
+        tb_customer_profile = tb_customer_profile.drop(columns=['customer_lat', 'customer_lng'], axis=0)
+    
+        # Calculating customer info
+        location = get_geolocation(query=cep, api_key=api_key)
+        address = location['location_address']
+        customer_lat = location['location_latitude']
+        customer_lng = location['location_longitude']
+
+        profile = np.zeros(tb_customer_profile.shape[1]-1).tolist()
+    
+        # Define an empty vector for new customer
+        #return (np.zeros(tb_customer_profile.shape[1]-1), True, customer_lat, customer_lng, address)
+        return {'customer_profile':profile, 
+                'new_customer': True, 
+                'location_latitude':customer_lat, 
+                'location_longitude':customer_lng,
+                'location_address':'No address'}
+   
+    else:
+    
+        customer_lat = tb_customer_profile['customer_lat'][0]
+        customer_lng = tb_customer_profile['customer_lng'][0]
+    
+        # Removing spare columns
+        tb_customer_profile = tb_customer_profile.drop(columns=['customer_lat', 'customer_lng'], axis=0)
+    
+        ## Adjusting values that are inversely proportional in customer table
+        tb_customer_profile[tb_customer_profile.columns[1:13]] = tb_customer_profile[tb_customer_profile.columns[1:13]].apply(lambda x:-x)
+
+        profile = tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy().tolist()
+        #return (tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy(), False, customer_lat, customer_lng, 'No Address')
+        return {'customer_profile':profile, 
+                'new_customer': False, 
+                'location_latitude':customer_lat, 
+                'location_longitude':customer_lng,
+                'location_address':'No address'}
