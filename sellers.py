@@ -164,7 +164,7 @@ def get_customer_profile(server, database, username, password, customer_id, api_
     
         # Define an empty vector for new customer
         #return (np.zeros(tb_customer_profile.shape[1]-1), True, customer_lat, customer_lng, address)
-        return {'customer_profile':profile, 
+        return {'customer_profile':[str(value) for value in profile], 
                 'new_customer': True, 
                 'location_latitude':customer_lat, 
                 'location_longitude':customer_lng,
@@ -183,7 +183,7 @@ def get_customer_profile(server, database, username, password, customer_id, api_
 
         profile = tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy().tolist()
         #return (tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy(), False, customer_lat, customer_lng, 'No Address')
-        return {'customer_profile':profile, 
+        return {'customer_profile':[str(value) for value in profile], 
                 'new_customer': False, 
                 'location_latitude':customer_lat, 
                 'location_longitude':customer_lng,
