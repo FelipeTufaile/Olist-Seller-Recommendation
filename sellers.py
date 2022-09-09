@@ -131,7 +131,7 @@ def get_customer_profile(server, database, username, password, customer_id):
 
 
 # Creating function to create customer profile
-def select_customer_profile(server, database, username, password, customer_id, api_key, cep=''):
+def get_customer_profile(server, database, username, password, customer_id, api_key, cep=''):
 
   # Start a connection using your dredentials
     database = db_connect(server, database, username, password)
