@@ -90,7 +90,7 @@ def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key
 def db_connect(server, database, username, password):
 
     # read credentials
-    driver = '{ODBC Driver 18 for SQL Server}'
+    driver = '{ODBC Driver 17 for SQL Server}'
     conn_mode = 'Encrypt=yes;TrustServerCertificate=no;Connection Timeout=30'
 
     # create connection object
@@ -159,16 +159,9 @@ def get_customer_profile(server, database, username, password, customer_id, api_
         address = location['location_address']
         customer_lat = location['location_latitude']
         customer_lng = location['location_longitude']
-
-        profile = np.zeros(tb_customer_profile.shape[1]-1).tolist()
     
         # Define an empty vector for new customer
-        #return (np.zeros(tb_customer_profile.shape[1]-1), True, customer_lat, customer_lng, address)
-        return {'customer_profile':[str(value) for value in profile], 
-                'new_customer': True, 
-                'location_latitude':customer_lat, 
-                'location_longitude':customer_lng,
-                'location_address':'No address'}
+        return (np.zeros(tb_customer_profile.shape[1]-1), True, customer_lat, customer_lng, address)
    
     else:
     
@@ -181,10 +174,4 @@ def get_customer_profile(server, database, username, password, customer_id, api_
         ## Adjusting values that are inversely proportional in customer table
         tb_customer_profile[tb_customer_profile.columns[1:13]] = tb_customer_profile[tb_customer_profile.columns[1:13]].apply(lambda x:-x)
 
-        profile = tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy().tolist()
-        #return (tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy(), False, customer_lat, customer_lng, 'No Address')
-        return {'customer_profile':[str(value) for value in profile], 
-                'new_customer': False, 
-                'location_latitude':customer_lat, 
-                'location_longitude':customer_lng,
-                'location_address':'No address'}
+        return (tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy(), False, customer_lat, customer_lng, 'No Address')
