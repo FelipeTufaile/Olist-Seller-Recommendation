@@ -108,24 +108,6 @@ def db_connect(server, database, username, password):
     return engine_azure
 
 ########################################## CREATING FUNCTION: query_database #########################################
-######################################################################################################################
-
-def get_customer_profile(server, database, username, password, customer_id):
-
-    # Start a connection using your dredentials
-    database = db_connect(server, database, username, password)
-
-    # Building query
-    query = "SELECT * FROM dbo.tb_customers_profile WHERE customer_unique_id = '{customer_id}'".format(customer_id=customer_id)
-
-    # Get columns
-    columns = database.execute(query).keys()
-
-    # Get data
-    result = database.execute(query)
-
-    ## Querying information
-    return {'data':[dict(zip(columns, row)) for row in result]}
 
 ######################################################################################################################
 
