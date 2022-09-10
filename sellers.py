@@ -108,9 +108,7 @@ def db_connect(server, database, username, password):
     return engine_azure
 
 ########################################## CREATING FUNCTION: query_database #########################################
-
 ######################################################################################################################
-
 
 # Creating function to create customer profile
 def get_customer_profile(connection, customer_id, api_key, payment_installments, payment_boleto, payment_credit_card, 
@@ -248,7 +246,10 @@ def normalize(values):
 # Define function to recommend seller
 def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
 
-    line = arr_sllrs - arr_cstmrs
+    arr_sllrs = np.array(arr_sllrs)
+    arr_cstmrs = np.array(arr_cstmrs)
+    
+    line = arr_sllrs.astype(np.float32) - arr_cstmrs.astype(np.float32)
   
     return line.tolist()
 
@@ -272,7 +273,7 @@ def main_function(server, database, username, password, customer_id, product_cat
     customer_profile = get_customer_profile(connection, customer_id, api_key, payment_installments, payment_boleto, 
                                             payment_credit_card, payment_voucher, payment_debit_card, cep)
     
-    arr_cstmrs = customer_profile[0]
+    arr_cstmrs = customer_profile[0].tolist()
     customer_lat = customer_profile[1]
     customer_lng = customer_profile[2] 
     address = customer_profile[3]
@@ -280,7 +281,7 @@ def main_function(server, database, username, password, customer_id, product_cat
     ## Build sellers profile array
     sellers_profile = get_seller_profile(connection, product_category, customer_lat, customer_lng, api_key)
 
-    arr_sllrs = sellers_profile[0]
+    arr_sllrs = sellers_profile[0].tolist()
     sellers = sellers_profile[1] 
 
     ## Recommend seller
