@@ -265,7 +265,11 @@ def normalize(values):
 
 # Define function to recommend seller
 def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
+
+    line = arr_sllrs - arr_cstmrs
   
+    return line.tolist()
+
     # Calculate distances between customers and sellers
     dist_matrix = pd.DataFrame(arr_sllrs - arr_cstmrs).apply(normalize).fillna(0).to_numpy()
     dist_vec = 5-5*dist_matrix.sum(axis=1)/dist_matrix.shape[1]
@@ -294,18 +298,17 @@ def main_function(server, database, username, password, customer_id, product_cat
     ## Build sellers profile array
     sellers_profile = get_seller_profile(connection, product_category, customer_lat, customer_lng, api_key)
 
-    result = []
-    for vector in sellers_profile[0].tolist():
-        row = [str(i) for i in vector]
-        result.append(row)
-
-
-    return {'arr_sllrs':result, 'sellers':sellers_profile[1]}
     arr_sllrs = sellers_profile[0]
     sellers = sellers_profile[1] 
 
     ## Recommend seller
     tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers)
+
+    result = []
+    for vector in tb_recommendation:
+        row = [str(i) for i in vector]
+        result.append(row)
+    return result
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
