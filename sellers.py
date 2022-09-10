@@ -225,7 +225,6 @@ def get_seller_profile(connection, product_category, dest_lat, dest_lng, api_key
       
         orgn_lat = seller['seller_lat']
         orgn_lng = seller['seller_lng']
-        seller_id = seller['seller_id']
 
         # Parse response
         distances = get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key)
@@ -266,8 +265,6 @@ def normalize(values):
 
 # Define function to recommend seller
 def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
-
-    return (arr_sllrs - arr_cstmrs)
   
     # Calculate distances between customers and sellers
     dist_matrix = pd.DataFrame(arr_sllrs - arr_cstmrs).apply(normalize).fillna(0).to_numpy()
@@ -288,6 +285,8 @@ def main_function(server, database, username, password, customer_id, product_cat
     ## Build customer profile array
     customer_profile = get_customer_profile(connection, customer_id, api_key, payment_installments, payment_boleto, 
                                             payment_credit_card, payment_voucher, payment_debit_card, cep)
+    
+    return {'arr_cstmrs':[str(i) for i in customer_profile[0].tolist()[0]], 'customer_lat':str(customer_profile[1]), 'customer_lng':str(customer_profile[2]), 'address':customer_profile[3]}
     arr_cstmrs = customer_profile[0]
     customer_lat = customer_profile[1]
     customer_lng = customer_profile[2] 
@@ -296,12 +295,10 @@ def main_function(server, database, username, password, customer_id, product_cat
     ## Build sellers profile array
     sellers_profile = get_seller_profile(connection, product_category, customer_lat, customer_lng, api_key)
     arr_sllrs = sellers_profile[0]
-    sellers = sellers_profile[1]
+    sellers = sellers_profile[1] 
 
     ## Recommend seller
     tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers)
-
-    return {'arr_sllrs':[str(i) for i in tb_recommendation[0].tolist()], 'arr_cstmrs':[str(i) for i in tb_recommendation[1].tolist()]}
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
