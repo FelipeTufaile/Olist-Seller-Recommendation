@@ -266,15 +266,17 @@ def normalize(values):
 
 # Define function to recommend seller
 def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
+
+    return (arr_sllrs - arr_cstmrs)
   
-  # Calculate distances between customers and sellers
-  dist_matrix = pd.DataFrame(arr_sllrs - arr_cstmrs).apply(normalize).fillna(0).to_numpy()
-  dist_vec = 5-5*dist_matrix.sum(axis=1)/dist_matrix.shape[1]
+    # Calculate distances between customers and sellers
+    dist_matrix = pd.DataFrame(arr_sllrs - arr_cstmrs).apply(normalize).fillna(0).to_numpy()
+    dist_vec = 5-5*dist_matrix.sum(axis=1)/dist_matrix.shape[1]
   
-  # Unifying sellers Ids and distances
-  lines = list(zip(sellers, list(dist_vec)))
+    # Unifying sellers Ids and distances
+    lines = list(zip(sellers, list(dist_vec)))
   
-  return pd.DataFrame(lines, columns=['seller_id', 'score']).sort_values(by='score', ascending=False).head(10)
+    return pd.DataFrame(lines, columns=['seller_id', 'score']).sort_values(by='score', ascending=False).head(10)
 
 
 def main_function(server, database, username, password, customer_id, product_category, payment_installments, payment_boleto, 
@@ -298,6 +300,8 @@ def main_function(server, database, username, password, customer_id, product_cat
 
     ## Recommend seller
     tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers)
+
+    return {'arr_sllrs':[str(i) for i in tb_recommendation[0].tolist()], 'arr_cstmrs':[str(i) for i in tb_recommendation[1].tolist()]}
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
