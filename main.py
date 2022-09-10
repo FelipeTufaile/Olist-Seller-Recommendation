@@ -12,8 +12,8 @@ def get_geolocation(query, api_key):
 def get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key):
     return sellers.get_seller_customer_distance(orgn_lat, orgn_lng, dest_lat, dest_lng, api_key)
 
-@app.route('/customerprofile/<server>/<database>/<username>/<password>/<customer_id>/<cep>/<api_key>')
-def get_customer_profile(server, database, username, password, customer_id, cep, api_key):
-    return sellers.get_customer_profile(server, database, username, password, customer_id, cep, api_key)
-
-## Note to self
+@app.route('/recommendsellers/<server>/<database>/<username>/<password>/<customer_id>/<product_category>/<payment_installments>/<payment_boleto>/<payment_credit_card>/<payment_voucher>/<payment_debit_card>/<api_key>/<cep>')
+def main_function(server, database, username, password, customer_id, product_category, payment_installments, payment_boleto, 
+                  payment_credit_card, payment_voucher, payment_debit_card, api_key, cep):
+    return sellers.main_function(server, database, username, password, customer_id, product_category, payment_installments, payment_boleto, 
+                                 payment_credit_card, payment_voucher, payment_debit_card, api_key, cep)
