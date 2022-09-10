@@ -249,12 +249,10 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
     arr_sllrs = np.array(arr_sllrs)
     arr_cstmrs = np.array(arr_cstmrs)
     
-    line = arr_sllrs.astype(np.float32) - arr_cstmrs.astype(np.float32)
-  
-    return line.tolist()
+    difference_matrix = arr_sllrs.astype(np.float32) - arr_cstmrs.astype(np.float32)
 
     # Calculate distances between customers and sellers
-    dist_matrix = pd.DataFrame(arr_sllrs - arr_cstmrs).apply(normalize).fillna(0).to_numpy()
+    dist_matrix = pd.DataFrame(difference_matrix).apply(normalize).fillna(0).to_numpy()
     dist_vec = 5-5*dist_matrix.sum(axis=1)/dist_matrix.shape[1]
   
     # Unifying sellers Ids and distances
@@ -286,12 +284,6 @@ def main_function(server, database, username, password, customer_id, product_cat
 
     ## Recommend seller
     tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers)
-
-    result = []
-    for vector in tb_recommendation:
-        row = [str(i) for i in vector]
-        result.append(row)
-    return result
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
