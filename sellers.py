@@ -141,7 +141,7 @@ def get_customer_profile(connection, customer_id, api_key, payment_installments,
         customer_lng = location['location_longitude']
 
         # Creating table
-        data = np.zeros(tb_customer_profile.shape[1]-1).tolist()
+        data = np.ones(tb_customer_profile.shape[1]-1).tolist()
         tb_customer_profile = pd.concat([tb_customer_profile.reset_index(drop=True), 
                                          pd.DataFrame([data], columns=list(columns)[1:-2]).reset_index(drop=True)],
                                          axis=0)
@@ -225,7 +225,7 @@ def get_seller_profile(connection, product_category, dest_lat, dest_lng, api_key
     ## Adjusting values that are inversely proportional in customer table
     tb_sellers_profile[tb_sellers_profile.columns[1:13]] = tb_sellers_profile[tb_sellers_profile.columns[1:13]].apply(lambda x:-x)
     
-    return (tb_sellers_profile[tb_sellers_profile.columns[1:]].to_numpy(), list(tb_sellers_profile['seller_id']))
+    return (tb_sellers_profile[tb_sellers_profile.columns[1:]].to_numpy(), list(tb_sellers_profile['seller_id']), list(columns)[1:-2])
 
 
 ######################################################################################################################
@@ -243,22 +243,82 @@ def normalize(values):
 
 ######################################################################################################################
 
-# Define function to recommend seller
-def recommend_sellers(arr_sllrs, arr_cstmrs, sellers):
+# Get variables that have the most positive and negative contributions
+def get_vip(values, features_averages, address):
 
+    if(address==''):
+
+        # Calculating score per category
+        size = (values[0] + values[5] + values[6])/(features_averages[0] + features_averages[5] + features_averages[6])
+        review = (values[1] + values[2])/(features_averages[1] + features_averages[2])
+        description = (values[3] + values[4])/(features_averages[3] + features_averages[4])
+        installment = values[7]/features_averages[7]
+        payment_method = sum(values[8:12])/sum(features_averages[8:12])
+        freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
+        distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
+        delay = (values[16] + values[17])/(features_averages[16] + features_averages[17])
+
+        categories = ['size', 'review', 'description', 'installment', 'payment_method', 'freight', 'distance', 'delay']
+        category_score = [size, review, description, installment, payment_method, freight, distance, delay]
+        
+        lowest_score_feature = [categories[category_score.index(min(category_score))], min(category_score)]
+        highest_score_feature = [categories[category_score.index(max(category_score))], max(category_score)]
+        
+        return {'lowest_score_feature':lowest_score_feature, 'highest_score_feature':highest_score_feature}
+    
+    else:
+        # Calculating score per category
+        installment = values[7]/features_averages[7]
+        payment_method = sum(values[8:12])/sum(features_averages[8:12])
+        freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
+        distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
+
+        categories = ['installment', 'payment_method', 'freight', 'distance']
+        category_score = [installment, payment_method, freight, distance]
+        
+        lowest_score_feature = [categories[category_score.index(min(category_score))], min(category_score)]
+        highest_score_feature = [categories[category_score.index(max(category_score))], max(category_score)]
+        
+        return {'lowest_score_feature':lowest_score_feature, 'highest_score_feature':highest_score_feature}
+    
+
+# Define function to recommend seller
+def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address):
+
+    # Converting profile lists to numpy arrays
     arr_sllrs = np.array(arr_sllrs)
     arr_cstmrs = np.array(arr_cstmrs)
     
+    # Calculating the difference between customer profile and seller profiles
     difference_matrix = arr_sllrs.astype(np.float32) - arr_cstmrs.astype(np.float32)
 
     # Calculate distances between customers and sellers
     dist_matrix = pd.DataFrame(difference_matrix).apply(normalize).fillna(0).to_numpy()
-    dist_vec = 5-5*dist_matrix.sum(axis=1)/dist_matrix.shape[1]
+    dist_matrix = 10*(1 - dist_matrix)
+
+    # Calculating averages
+    features_averages = np.mean(dist_matrix, axis=0)
+
+    col_hscore, val_hscore, col_lscore, val_lscore = [], [], [], []
+    # Calculate variable importance
+    for seller_profile_distance in dist_matrix:
+        col_hscore.append(get_vip(seller_profile_distance.tolist(), features_averages.tolist(), address)['highest_score_feature'][0])
+        val_hscore.append(get_vip(seller_profile_distance.tolist(), features_averages.tolist(), address)['highest_score_feature'][1])
+        col_lscore.append(get_vip(seller_profile_distance.tolist(), features_averages.tolist(), address)['lowest_score_feature'][0])
+        val_lscore.append(get_vip(seller_profile_distance.tolist(), features_averages.tolist(), address)['lowest_score_feature'][1])
+
+    # Calculating distance vector and converting it between scores 0 to 5
+    dist_vec = 5*dist_matrix.sum(axis=1)/180
   
     # Unifying sellers Ids and distances
-    lines = list(zip(sellers, list(dist_vec)))
+    lines = list(zip(sellers, list(dist_vec), col_hscore, val_hscore, col_lscore, val_lscore))
+
+    # Creating final result table
+    result_columns=['seller_id', 'score', 'highest_score_feature', 'highest_score', 'lowest_score_feature', 'lowest_score']
+
+    result_table = pd.DataFrame(lines, columns=result_columns)
   
-    return pd.DataFrame(lines, columns=['seller_id', 'score']).sort_values(by='score', ascending=False).head(10)
+    return result_table.sort_values(by='score', ascending=False).head(10)
 
 
 def main_function(server, database, username, password, customer_id, product_category, payment_installments, payment_boleto, 
@@ -280,13 +340,16 @@ def main_function(server, database, username, password, customer_id, product_cat
     sellers_profile = get_seller_profile(connection, product_category, customer_lat, customer_lng, api_key)
 
     arr_sllrs = sellers_profile[0].tolist()
-    sellers = sellers_profile[1] 
+    sellers = sellers_profile[1]
+    columns = sellers_profile[2]
 
     ## Recommend seller
-    tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers)
+    tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address)
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
+    tb_recommendation['highest_score'] = tb_recommendation['highest_score'].apply(lambda x:str(x))
+    tb_recommendation['lowest_score'] = tb_recommendation['lowest_score'].apply(lambda x:str(x))
     result = tb_recommendation.to_dict('records')
 
     return {'customer_id':customer_id, 'recommendation':result, 'address':address}
