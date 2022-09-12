@@ -280,10 +280,25 @@ def get_vip(values, features_averages, address):
         highest_score_feature = [categories[category_score.index(max(category_score))], max(category_score)]
         
         return {'lowest_score_feature':lowest_score_feature, 'highest_score_feature':highest_score_feature}
+
+def get_priorities(delivery, review, freight):
+
+    vector = np.zeros(18).tolist()
+    if (delivery==1):
+        vector[13] = 1
+        vector[14] = 1
+    if (review==1):
+        vector[1] = 1
+        vector[2]
+    if (freight==1):
+        vector[12] = 1
+        vector[15] = 1
+    
+    return vector
     
 
 # Define function to recommend seller
-def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address):
+def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address, priority_delivery, priority_review, priority_freight):
 
     # Converting profile lists to numpy arrays
     arr_sllrs = np.array(arr_sllrs)
@@ -294,7 +309,12 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address):
 
     # Calculate distances between customers and sellers
     dist_matrix = pd.DataFrame(difference_matrix).apply(normalize).fillna(0).to_numpy()
-    dist_matrix = 10*(1 - dist_matrix)
+    dist_matrix = 10*(np.array([1]).astype(np.float32) - dist_matrix)
+
+    # Check if user has given any priority to a specific set of features
+    if ((priority_delivery > 0) | (priority_review > 0) | (priority_freight > 0)):
+        priority_vector = get_priorities(priority_delivery, priority_review, priority_freight)
+        dis_matrix = dis_matrix*np.array(priority_vector)
 
     # Calculating averages
     features_averages = np.mean(dist_matrix, axis=0)
@@ -322,7 +342,8 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address):
 
 
 def main_function(server, database, username, password, customer_id, product_category, payment_installments, payment_boleto, 
-                  payment_credit_card, payment_voucher, payment_debit_card, api_key, cep=''):
+                  payment_credit_card, payment_voucher, payment_debit_card, api_key, priority_delivery, priority_review, 
+                  priority_freight, cep=''):
 
     # Start a connection using your dredentials
     connection = db_connect(server, database, username, password)
@@ -344,7 +365,7 @@ def main_function(server, database, username, password, customer_id, product_cat
     columns = sellers_profile[2]
 
     ## Recommend seller
-    tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address)
+    tb_recommendation = recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address, priority_delivery, priority_review, priority_freight)
 
     ## Converting response pandas table to json
     tb_recommendation['score'] = tb_recommendation['score'].apply(lambda x:str(x))
