@@ -223,7 +223,7 @@ def get_seller_profile(connection, product_category, dest_lat, dest_lng, api_key
     tb_sellers_profile = tb_sellers_profile.drop(columns=['seller_lat', 'seller_lng'], axis=0)
     
     ## Adjusting values that are inversely proportional in customer table
-    tb_sellers_profile[tb_sellers_profile.columns[1:13]] = tb_sellers_profile[tb_sellers_profile.columns[1:13]].apply(lambda x:-float(x))
+    tb_sellers_profile[tb_sellers_profile.columns[1:13]] = tb_sellers_profile[tb_sellers_profile.columns[1:13]].apply(lambda x:-x)
     
     return (tb_sellers_profile[tb_sellers_profile.columns[1:]].to_numpy(), list(tb_sellers_profile['seller_id']), list(columns)[1:-2])
 
