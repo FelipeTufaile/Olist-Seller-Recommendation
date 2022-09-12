@@ -314,7 +314,7 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address, priority_delivery
     # Check if user has given any priority to a specific set of features
     if ((int(priority_delivery) > int(0)) | (int(priority_review) > int(0)) | (int(priority_freight) > int(0))):
         priority_vector = get_priorities(priority_delivery, priority_review, priority_freight)
-        dis_matrix = dis_matrix*np.array(priority_vector)
+        dist_matrix = dist_matrix*np.array(priority_vector)
 
     # Calculating averages
     features_averages = np.mean(dist_matrix, axis=0)
