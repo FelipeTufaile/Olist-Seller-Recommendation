@@ -330,13 +330,13 @@ def get_vip(values, features_averages, address):
 def get_priorities(delivery, review, freight):
 
     vector = np.zeros(18).tolist()
-    if (delivery==1):
+    if (delivery>0):
         vector[13] = 1
         vector[14] = 1
-    if (review==1):
+    if (review>0):
         vector[1] = 1
-        vector[2]
-    if (freight==1):
+        vector[2] = 1
+    if (freight>0):
         vector[12] = 1
         vector[15] = 1
     
