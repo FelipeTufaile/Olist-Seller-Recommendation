@@ -312,7 +312,7 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address, priority_delivery
     dist_matrix = 10*(np.array([1]).astype(np.float32) - dist_matrix)
 
     # Check if user has given any priority to a specific set of features
-    if ((int(priority_delivery) > 0) | (int(priority_review) > 0) | (int(priority_freight) > 0)):
+    if ((int(priority_delivery) > int(0)) | (int(priority_review) > int(0)) | (int(priority_freight) > int(0))):
         priority_vector = get_priorities(priority_delivery, priority_review, priority_freight)
         dis_matrix = dis_matrix*np.array(priority_vector)
 
