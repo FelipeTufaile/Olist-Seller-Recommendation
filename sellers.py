@@ -223,7 +223,7 @@ def get_seller_profile(connection, product_category, dest_lat, dest_lng, api_key
     tb_sellers_profile = tb_sellers_profile.drop(columns=['seller_lat', 'seller_lng'], axis=0)
     
     ## Adjusting values that are inversely proportional in customer table
-    tb_sellers_profile[tb_sellers_profile.columns[1:13]] = tb_sellers_profile[tb_sellers_profile.columns[1:13]].apply(lambda x:-x)
+    tb_sellers_profile[tb_sellers_profile.columns[1:13]] = tb_sellers_profile[tb_sellers_profile.columns[1:13]].apply(lambda x:-float(x))
     
     return (tb_sellers_profile[tb_sellers_profile.columns[1:]].to_numpy(), list(tb_sellers_profile['seller_id']), list(columns)[1:-2])
 
@@ -312,7 +312,7 @@ def recommend_sellers(arr_sllrs, arr_cstmrs, sellers, address, priority_delivery
     dist_matrix = 10*(np.array([1]).astype(np.float32) - dist_matrix)
 
     # Check if user has given any priority to a specific set of features
-    if ((priority_delivery > 0) | (priority_review > 0) | (priority_freight > 0)):
+    if ((int(priority_delivery) > 0) | (int(priority_review) > 0) | (int(priority_freight) > 0)):
         priority_vector = get_priorities(priority_delivery, priority_review, priority_freight)
         dis_matrix = dis_matrix*np.array(priority_vector)
 
