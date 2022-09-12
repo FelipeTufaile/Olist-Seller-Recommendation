@@ -249,14 +249,45 @@ def get_vip(values, features_averages, address):
     if(address==''):
 
         # Calculating score per category
-        size = (values[0] + values[5] + values[6])/(features_averages[0] + features_averages[5] + features_averages[6])
-        review = (values[1] + values[2])/(features_averages[1] + features_averages[2])
-        description = (values[3] + values[4])/(features_averages[3] + features_averages[4])
-        installment = values[7]/features_averages[7]
-        payment_method = sum(values[8:12])/sum(features_averages[8:12])
-        freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
-        distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
-        delay = (values[16] + values[17])/(features_averages[16] + features_averages[17])
+        if(features_averages[0] + features_averages[5] + features_averages[6]==0):
+            size = (values[0] + values[5] + values[6])
+        else:
+            size = (values[0] + values[5] + values[6])/(features_averages[0] + features_averages[5] + features_averages[6])
+        
+        if(features_averages[1] + features_averages[2]==0):
+            review = (values[1] + values[2])
+        else:
+            review = (values[1] + values[2])/(features_averages[1] + features_averages[2])
+
+        if(features_averages[3] + features_averages[4]==0):
+            description = (values[3] + values[4])
+        else:
+            description = (values[3] + values[4])/(features_averages[3] + features_averages[4])
+
+        if(features_averages[7]==0):
+            installment = values[7]
+        else:
+            installment = values[7]/features_averages[7]
+
+        if(sum(features_averages[8:12])==0):
+            payment_method = sum(values[8:12])
+        else:
+            payment_method = sum(values[8:12])/sum(features_averages[8:12])
+
+        if(features_averages[12] + features_averages[13]==0):
+            freight = (values[12] + values[15])
+        else:
+            freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
+
+        if(features_averages[13] + features_averages[14]==0):
+            distance = (values[13] + values[14])
+        else:
+            distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
+
+        if(features_averages[16] + features_averages[17]==0):
+            delay = (values[16] + values[17])
+        else:
+            delay = (values[16] + values[17])/(features_averages[16] + features_averages[17])
 
         categories = ['size', 'review', 'description', 'installment', 'payment_method', 'freight', 'distance', 'delay']
         category_score = [size, review, description, installment, payment_method, freight, distance, delay]
@@ -268,10 +299,25 @@ def get_vip(values, features_averages, address):
     
     else:
         # Calculating score per category
-        installment = values[7]/features_averages[7]
-        payment_method = sum(values[8:12])/sum(features_averages[8:12])
-        freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
-        distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
+        if(features_averages[7]==0):
+            installment = values[7]
+        else:
+            installment = values[7]/features_averages[7]
+
+        if(sum(features_averages[8:12])==0):
+            payment_method = sum(values[8:12])
+        else:
+            payment_method = sum(values[8:12])/sum(features_averages[8:12])
+
+        if(features_averages[12] + features_averages[13]==0):
+            freight = (values[12] + values[15])
+        else:
+            freight = (values[12] + values[15])/(features_averages[12] + features_averages[13])
+
+        if(features_averages[13] + features_averages[14]==0):
+            distance = (values[13] + values[14])
+        else:
+            distance = (values[13] + values[14])/(features_averages[13] + features_averages[14])
 
         categories = ['installment', 'payment_method', 'freight', 'distance']
         category_score = [installment, payment_method, freight, distance]
