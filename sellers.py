@@ -171,7 +171,7 @@ def get_customer_profile(connection, customer_id, api_key, payment_installments,
         tb_customer_profile['payment_debit_card'] = payment_debit_card
     
         ## Adjusting values that are inversely proportional in customer table
-        tb_customer_profile[tb_customer_profile.columns[1:13]] = tb_customer_profile[tb_customer_profile.columns[1:13]].apply(lambda x:-x)
+        tb_customer_profile[tb_customer_profile.columns[1:13]] = tb_customer_profile[tb_customer_profile.columns[1:13]].apply(lambda x:-float(x))
 
         return (tb_customer_profile[tb_customer_profile.columns[1:]].to_numpy(), customer_lat, customer_lng, '')
 
